@@ -7,16 +7,20 @@ import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rseanking.user.UserRepository;
+
 @SpringBootApplication
 @RestController
 @EnableResourceServer
 @EnableAuthorizationServer
+@EnableMongoRepositories(basePackageClasses= {UserRepository.class})
 public class Application {
 
 	@RequestMapping(value = "/user", produces = "application/json")
@@ -32,5 +36,4 @@ public class Application {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(Application.class, args);
 	}
-
 }

@@ -5,6 +5,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.rseanking.user.User;
+import com.rseanking.user.UserRepository;
+
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -30,11 +35,28 @@ public class ApplicationIT {
 
 	@Autowired
 	private MockMvc mvc;
+	@Autowired
+	private UserRepository userRepository;
+
+	private User user;
+
+	@Before
+	public void setUp() {
+		user = new User();
+		user.setUsername("testroleadmin");
+		user.setPasword("{noop}test");
+		userRepository.save(user);
+	}
+
+	@After
+	public void tearDown() {
+		userRepository.deleteAll();
+	}
 
 	@Test
 	public void shouldRejectAuthenticationWithBadCredentials() throws Exception {
 		// Given
-		MultiValueMap<String, String> params = buildValidRequestParameters();
+		MultiValueMap<String, String> params = buildValidRequestParameters(user);
 		params.set("password", "invalid_password");
 
 		// When
@@ -51,7 +73,7 @@ public class ApplicationIT {
 	@Test
 	public void shouldRejectAuthenticationWithInvalidScope() throws Exception {
 		// Given
-		MultiValueMap<String, String> params = buildValidRequestParameters();
+		MultiValueMap<String, String> params = buildValidRequestParameters(user);
 		params.set("scope", "invalid_scope");
 
 		// When
@@ -65,11 +87,11 @@ public class ApplicationIT {
 		assertThat(result.get("error_description")).isEqualTo("Invalid scope: invalid_scope");
 		assertThat(result.get("scope")).isEqualTo("webclient mobileclient");
 	}
-	
+
 	@Test
 	public void shouldRejectAuthenticationWithUnsupportedGrantType() throws Exception {
 		// Given
-		MultiValueMap<String, String> params = buildValidRequestParameters();
+		MultiValueMap<String, String> params = buildValidRequestParameters(user);
 		params.set("grant_type", "unsupported_grant_type");
 
 		// When
@@ -86,7 +108,7 @@ public class ApplicationIT {
 	@Test
 	public void shouldAcceptAuthentication() throws Exception {
 		// Given
-		MultiValueMap<String, String> params = buildValidRequestParameters();
+		MultiValueMap<String, String> params = buildValidRequestParameters(user);
 
 		ResultActions perform = authenticate(params);
 
@@ -100,17 +122,17 @@ public class ApplicationIT {
 		assertThat(result.get("expires_in")).isEqualTo(43199);
 		assertThat(result.get("scope")).isEqualTo("webclient");
 	}
-	
-	private MultiValueMap<String, String> buildValidRequestParameters() {
+
+	private MultiValueMap<String, String> buildValidRequestParameters(final User user) {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add("grant_type", "password");
 		params.add("scope", "webclient");
-		params.add("username", "testroleadmin");
-		params.add("password", "test");
-		
+		params.add("username", user.getUsername());
+		params.add("password", user.getPasword().replace("{noop}", ""));
+
 		return params;
 	}
-	
+
 	private ResultActions authenticate(MultiValueMap<String, String> params) throws Exception {
 		final String authenticationUrl = "http://localhost:" + port + "/oauth/token";
 		ResultActions perform = mvc.perform(MockMvcRequestBuilders.post(authenticationUrl)
