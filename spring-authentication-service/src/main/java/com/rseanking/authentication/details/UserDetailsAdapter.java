@@ -1,10 +1,12 @@
 package com.rseanking.authentication.details;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.rseanking.user.User;
@@ -20,7 +22,7 @@ public class UserDetailsAdapter implements UserDetails{
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return emptyList();
+		return user.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.name())).collect(toSet());
 	}
 
 	@Override
