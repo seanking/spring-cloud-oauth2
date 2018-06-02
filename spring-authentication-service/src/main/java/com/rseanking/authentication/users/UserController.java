@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UsersController {
+public class UserController {
 
 	@RequestMapping(value = "/user", produces = "application/json")
 	private Map<String, Object> user(OAuth2Authentication user) {
