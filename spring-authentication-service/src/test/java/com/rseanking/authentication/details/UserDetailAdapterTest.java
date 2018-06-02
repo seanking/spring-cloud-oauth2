@@ -22,7 +22,7 @@ public class UserDetailAdapterTest {
 		assertThat(details.getUser()).isEqualTo(user);
 		assertThat(details.getUsername()).isEqualTo(user.getUsername());
 		assertThat(details.getPassword()).isEqualTo(user.getPasword());
-		assertThat(details.getAuthorities()).isNull();
+		assertThat(details.getAuthorities()).isEmpty();
 		assertThat(details.isAccountNonExpired()).isTrue();
 		assertThat(details.isAccountNonLocked()).isTrue();
 		assertThat(details.isCredentialsNonExpired()).isTrue();

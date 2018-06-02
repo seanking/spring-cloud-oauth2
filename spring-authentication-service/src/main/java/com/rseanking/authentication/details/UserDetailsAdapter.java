@@ -1,7 +1,8 @@
 package com.rseanking.authentication.details;
 
+import static java.util.Collections.emptyList;
+
 import java.util.Collection;
-import java.util.function.IntPredicate;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,7 @@ public class UserDetailsAdapter implements UserDetails{
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return null;
+		return emptyList();
 	}
 
 	@Override
