@@ -2,6 +2,8 @@ package com.rseanking.authentication.users;
 
 import static com.rseanking.authentication.utils.AuthenticationUtil.buildValidRequestParameters;
 import static com.rseanking.authentication.utils.AuthenticationUtil.httpBasicCreds;
+import static com.rseanking.user.Role.ADMIN;
+import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,7 +11,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.rseanking.user.Role;
 import com.rseanking.user.User;
 import com.rseanking.user.UserRepository;
 
@@ -45,6 +50,7 @@ public class UserControllerIT {
 		user = new User();
 		user.setUsername("testroleadmin");
 		user.setPasword("{noop}test");
+		user.setRoles(singleton(ADMIN));
 		userRepository.save(user);
 	}
 
@@ -61,13 +67,14 @@ public class UserControllerIT {
 		final ResultActions userResultAction = mvc.perform(get(userUrl).header("Authorization", token));
 
 		// Then
-		userResultAction.andExpect(jsonPath("$.user.user.username", equalTo(user.getUsername())));
+		userResultAction.andExpect(jsonPath("$.user.user.username", equalTo(user.getUsername())))
+			.andExpect(jsonPath("$.authorities.[0]", equalTo(ADMIN.name())));
 	}
 
 	private String authenticateUser(final User user) throws Exception, UnsupportedEncodingException {
 		final String authenticationUrl = "http://localhost:" + port + "/oauth/token";
-		final ResultActions authenticationActionResult = mvc.perform(post(authenticationUrl)
-				.with(httpBasicCreds()).params(buildValidRequestParameters(user)));
+		final ResultActions authenticationActionResult = mvc
+				.perform(post(authenticationUrl).with(httpBasicCreds()).params(buildValidRequestParameters(user)));
 
 		final String authenticationBody = authenticationActionResult.andReturn().getResponse().getContentAsString();
 
