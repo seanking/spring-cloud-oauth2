@@ -25,7 +25,6 @@ public class UserDetailAdapterTest {
 		final UserDetailsAdapter details = new UserDetailsAdapter(user);
 		
 		// Then
-		assertThat(details.getUser()).isEqualTo(user);
 		assertThat(details.getUsername()).isEqualTo(user.getUsername());
 		assertThat(details.getPassword()).isEqualTo(user.getPasword());
 		

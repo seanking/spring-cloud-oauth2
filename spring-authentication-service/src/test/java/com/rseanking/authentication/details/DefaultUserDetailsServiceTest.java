@@ -33,7 +33,7 @@ public class DefaultUserDetailsServiceTest {
 		final UserDetailsAdapter userDetails = (UserDetailsAdapter) uut.loadUserByUsername(user.getUsername());
 
 		// Then
-		assertThat(userDetails.getUser()).isEqualTo(user);
+		assertThat(userDetails.getUsername()).isEqualTo(user.getUsername());
 	}
 
 	@Test(expected = UsernameNotFoundException.class)
