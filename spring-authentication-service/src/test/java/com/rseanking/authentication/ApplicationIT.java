@@ -1,25 +1,24 @@
 package com.rseanking.authentication;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-
-import java.util.Map;
+import static com.rseanking.authentication.utils.AuthenticationUtil.buildValidRequestParameters;
+import static com.rseanking.authentication.utils.AuthenticationUtil.httpBasicCreds;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import com.rseanking.user.User;
@@ -27,7 +26,7 @@ import com.rseanking.user.UserRepository;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class ApplicationIT {
 
 	@LocalServerPort
@@ -60,14 +59,11 @@ public class ApplicationIT {
 		params.set("password", "invalid_password");
 
 		// When
-		ResultActions perform = authenticate(params);
+		ResultActions action = authenticateUser(params);
 
 		// Then
-		final String body = perform.andReturn().getResponse().getContentAsString();
-		Map<String, Object> result = new JacksonJsonParser().parseMap(body);
-
-		assertThat(result.get("error")).isEqualTo("invalid_grant");
-		assertThat(result.get("error_description")).isEqualTo("Bad credentials");
+		action.andExpect(jsonPath("$.error", equalTo("invalid_grant")))
+				.andExpect(jsonPath("$.error_description", equalTo("Bad credentials")));
 	}
 
 	@Test
@@ -77,15 +73,12 @@ public class ApplicationIT {
 		params.set("scope", "invalid_scope");
 
 		// When
-		ResultActions perform = authenticate(params);
+		ResultActions action = authenticateUser(params);
 
 		// Then
-		final String body = perform.andReturn().getResponse().getContentAsString();
-		Map<String, Object> result = new JacksonJsonParser().parseMap(body);
-
-		assertThat(result.get("error")).isEqualTo("invalid_scope");
-		assertThat(result.get("error_description")).isEqualTo("Invalid scope: invalid_scope");
-		assertThat(result.get("scope")).isEqualTo("webclient mobileclient");
+		action.andExpect(jsonPath("$.error", equalTo("invalid_scope")))
+				.andExpect(jsonPath("$.error_description", equalTo("Invalid scope: invalid_scope")))
+				.andExpect(jsonPath("$.scope", equalTo("webclient mobileclient")));
 	}
 
 	@Test
@@ -95,14 +88,11 @@ public class ApplicationIT {
 		params.set("grant_type", "unsupported_grant_type");
 
 		// When
-		ResultActions perform = authenticate(params);
+		ResultActions action = authenticateUser(params);
 
 		// Then
-		final String body = perform.andReturn().getResponse().getContentAsString();
-		Map<String, Object> result = new JacksonJsonParser().parseMap(body);
-
-		assertThat(result.get("error")).isEqualTo("unsupported_grant_type");
-		assertThat(result.get("error_description")).isEqualTo("Unsupported grant type: unsupported_grant_type");
+		action.andExpect(jsonPath("$.error", equalTo("unsupported_grant_type")))
+				.andExpect(jsonPath("$.error_description", equalTo("Unsupported grant type: unsupported_grant_type")));
 	}
 
 	@Test
@@ -110,33 +100,19 @@ public class ApplicationIT {
 		// Given
 		MultiValueMap<String, String> params = buildValidRequestParameters(user);
 
-		ResultActions perform = authenticate(params);
+		ResultActions action = authenticateUser(params);
 
 		// Then
-		final String body = perform.andReturn().getResponse().getContentAsString();
-		Map<String, Object> result = new JacksonJsonParser().parseMap(body);
-
-		assertThat(result.get("access_token")).isNotNull();
-		assertThat(result.get("token_type")).isEqualTo("bearer");
-		assertThat(result.get("refresh_token")).isNotNull();
-		assertThat(result.get("expires_in")).isEqualTo(43199);
-		assertThat(result.get("scope")).isEqualTo("webclient");
+		action.andExpect(jsonPath("$.access_token", notNullValue()))
+				.andExpect(jsonPath("$.token_type", equalTo("bearer")))
+				.andExpect(jsonPath("$.refresh_token", notNullValue()))
+				.andExpect(jsonPath("$.expires_in", equalTo(43199)))
+				.andExpect(jsonPath("$.scope", equalTo("webclient")));
 	}
 
-	private MultiValueMap<String, String> buildValidRequestParameters(final User user) {
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("grant_type", "password");
-		params.add("scope", "webclient");
-		params.add("username", user.getUsername());
-		params.add("password", user.getPasword().replace("{noop}", ""));
-
-		return params;
-	}
-
-	private ResultActions authenticate(MultiValueMap<String, String> params) throws Exception {
+	private ResultActions authenticateUser(MultiValueMap<String, String> params) throws Exception {
 		final String authenticationUrl = "http://localhost:" + port + "/oauth/token";
-		ResultActions perform = mvc.perform(MockMvcRequestBuilders.post(authenticationUrl)
-				.with(httpBasic("testclient", "thisisasecret")).params(params));
+		ResultActions perform = mvc.perform(post(authenticationUrl).with(httpBasicCreds()).params(params));
 		return perform;
 	}
 
