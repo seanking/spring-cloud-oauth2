@@ -1,6 +1,5 @@
 package com.rseanking.authentication.details;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
