@@ -1,13 +1,10 @@
 package com.rseanking.authentication.details;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -22,27 +19,26 @@ public class DefaultUserDetailsServiceTest {
 	private UserRepository repo;
 	@InjectMocks
 	private DefaultUserDetailsService uut;
-	
-	
+
 	@Test
 	public void shouldLoadUserByUsername() {
 		// Given
 		final User user = new User();
 		user.setUsername("testusername");
 		user.setPasword("testpassword");
-		
+
 		given(repo.findByUsername(user.getUsername())).willReturn(user);
-		
+
 		// When
 		final UserDetailsAdapter userDetails = (UserDetailsAdapter) uut.loadUserByUsername(user.getUsername());
-		
-		// Then 
+
+		// Then
 		assertThat(userDetails.getUser()).isEqualTo(user);
 	}
-	
-	@Test(expected=UsernameNotFoundException.class)
+
+	@Test(expected = UsernameNotFoundException.class)
 	public void shouldNotLoadUserByUsername() {
-		final UserDetailsAdapter userDetails = (UserDetailsAdapter) uut.loadUserByUsername("invalidname");
+		uut.loadUserByUsername("invalid-name");
 	}
 
 }
