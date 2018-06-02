@@ -11,9 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +26,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.rseanking.user.Role;
 import com.rseanking.user.User;
 import com.rseanking.user.UserRepository;
 
@@ -67,8 +64,8 @@ public class UserControllerIT {
 		final ResultActions userResultAction = mvc.perform(get(userUrl).header("Authorization", token));
 
 		// Then
-		userResultAction.andExpect(jsonPath("$.user.user.username", equalTo(user.getUsername())))
-			.andExpect(jsonPath("$.authorities.[0]", equalTo(ADMIN.name())));
+		userResultAction.andExpect(jsonPath("$.user.username", equalTo(user.getUsername())))
+			.andExpect(jsonPath("$.authorities.[0]", equalTo("ROLE_" + ADMIN.name())));
 	}
 
 	private String authenticateUser(final User user) throws Exception, UnsupportedEncodingException {
