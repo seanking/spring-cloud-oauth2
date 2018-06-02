@@ -1,5 +1,7 @@
 package com.rseanking.user;
 
+import static com.rseanking.user.Role.ADMIN;
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.After;
@@ -28,17 +30,20 @@ public class UserRepositoryTest {
 	@Test
 	public void shouldFindUserByUsername() {
 		// Given
-		final User user = new User();
-		user.setUsername("foo");
-		user.setPasword("foo");
+		final User existingUser = new User();
+		existingUser.setUsername("foo");
+		existingUser.setPasword("foo");
+		existingUser.setRoles(singleton(ADMIN));
 		
-		repo.save(user);
+		repo.save(existingUser);
 		
 		// When
-		final User foundUser = repo.findByUsername(user.getUsername());
+		final User foundUser = repo.findByUsername(existingUser.getUsername());
 		
 		// Then
-		assertThat(foundUser).isNotNull();
+		assertThat(foundUser.getUsername()).isEqualTo(existingUser.getUsername());
+		assertThat(foundUser.getPasword()).isEqualTo(existingUser.getPasword());
+		assertThat(foundUser.getRoles()).containsOnly(ADMIN);
 	}
 
 }
