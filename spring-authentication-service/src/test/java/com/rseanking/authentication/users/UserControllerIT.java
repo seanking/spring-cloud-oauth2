@@ -1,18 +1,7 @@
 package com.rseanking.authentication.users;
 
-import static com.rseanking.authentication.utils.AuthenticationUtil.buildValidRequestParameters;
-import static com.rseanking.authentication.utils.AuthenticationUtil.httpBasicCreds;
-import static com.rseanking.user.Role.ADMIN;
-import static java.util.Collections.singleton;
-import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-
+import com.rseanking.user.User;
+import com.rseanking.user.UserRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +15,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.rseanking.user.User;
-import com.rseanking.user.UserRepository;
+import java.util.Map;
+
+import static com.rseanking.authentication.utils.AuthenticationUtil.buildValidRequestParameters;
+import static com.rseanking.authentication.utils.AuthenticationUtil.httpBasicCreds;
+import static com.rseanking.user.Role.ADMIN;
+import static java.util.Collections.singleton;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -68,7 +66,7 @@ public class UserControllerIT {
 			.andExpect(jsonPath("$.authorities.[0]", equalTo("ROLE_" + ADMIN.name())));
 	}
 
-	private String authenticateUser(final User user) throws Exception, UnsupportedEncodingException {
+	private String authenticateUser(final User user) throws Exception {
 		final String authenticationUrl = "http://localhost:" + port + "/oauth/token";
 		final ResultActions authenticationActionResult = mvc
 				.perform(post(authenticationUrl).with(httpBasicCreds()).params(buildValidRequestParameters(user)));
@@ -77,7 +75,7 @@ public class UserControllerIT {
 
 		Map<String, Object> authenticationResult = new JacksonJsonParser().parseMap(authenticationBody);
 
-		return "Bearer " + (String) authenticationResult.get("access_token");
+		return "Bearer " + authenticationResult.get("access_token");
 	}
 
 }
