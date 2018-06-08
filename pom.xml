@@ -21,6 +21,7 @@
 	<modules>
 		<module>spring-user-data</module>
 		<module>spring-authentication-service</module>
+        <module>spring-protected-service</module>
 	</modules>
 
 	<properties>
