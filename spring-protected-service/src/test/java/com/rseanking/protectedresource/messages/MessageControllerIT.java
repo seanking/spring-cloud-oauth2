@@ -12,8 +12,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -36,7 +38,8 @@ public class MessageControllerIT {
     @WithMockUser(roles = "ADMIN")
     public void shouldGetAdminMessageForAdmin() throws Exception {
         mockMvc.perform(get("/adminMessage"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message", equalTo("message for the admin!")));
     }
 
     @Test(expected = NestedServletException.class)
@@ -49,7 +52,8 @@ public class MessageControllerIT {
     @WithMockUser(roles = "USER")
     public void shouldGetUserMessageForUser() throws Exception {
         mockMvc.perform(get("/userMessage"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message", equalTo("message for the user!")));
     }
 
     @Test(expected = NestedServletException.class)
