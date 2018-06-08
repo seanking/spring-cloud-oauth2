@@ -16,23 +16,23 @@ import com.rseanking.user.UserRepository;
 
 @Component
 public class DefaultUserDetailsService implements UserDetailsService {
-	@Autowired
-	private UserRepository repo;
-	
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		final User user = repo.findByUsername(username);
-		
-		if(user != null) {
-			final List<String> roles = user.getRoles().stream().map(r -> r.name()).collect(toList());
-			return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
-				.password(user.getPasword())
-				.roles(roles.toArray(new String[roles.size()]))
-				.build();
-		}
-		
-		final String errorMessage = format("Couldn't find the user for username: %s", username);
-		throw new UsernameNotFoundException(errorMessage);
-	}
+    @Autowired
+    private UserRepository repo;
+    
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        final User user = repo.findByUsername(username);
+        
+        if(user != null) {
+            final List<String> roles = user.getRoles().stream().map(r -> r.name()).collect(toList());
+            return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
+                .password(user.getPasword())
+                .roles(roles.toArray(new String[roles.size()]))
+                .build();
+        }
+        
+        final String errorMessage = format("Couldn't find the user for username: %s", username);
+        throw new UsernameNotFoundException(errorMessage);
+    }
 
 }

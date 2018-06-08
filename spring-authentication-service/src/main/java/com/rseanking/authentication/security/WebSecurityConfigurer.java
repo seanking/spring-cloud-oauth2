@@ -10,17 +10,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Configuration
 public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
-	@Autowired
-	private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-	@Override
-	@Bean
-	protected AuthenticationManager authenticationManager() throws Exception {
-		return super.authenticationManager();
-	}
+    @Override
+    @Bean
+    protected AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.userDetailsService(userDetailsService);
-	}
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.userDetailsService(userDetailsService);
+    }
 }

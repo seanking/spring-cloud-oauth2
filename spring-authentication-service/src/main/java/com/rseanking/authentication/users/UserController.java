@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-	@RequestMapping(value = "/user", produces = "application/json")
-	private Map<String, Object> user(OAuth2Authentication user) {
-		final Map<String, Object> userInfo = new HashMap<>();
+    @RequestMapping(value = "/user", produces = "application/json")
+    private Map<String, Object> user(OAuth2Authentication user) {
+        final Map<String, Object> userInfo = new HashMap<>();
 
-		userInfo.put("user", user.getUserAuthentication().getPrincipal());
-		userInfo.put("authorities", authorityListToSet(user.getUserAuthentication().getAuthorities()));
+        userInfo.put("user", user.getUserAuthentication().getPrincipal());
+        userInfo.put("authorities", authorityListToSet(user.getUserAuthentication().getAuthorities()));
 
-		return userInfo;
-	}
+        return userInfo;
+    }
 
 }
